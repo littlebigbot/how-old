@@ -13,6 +13,8 @@ function entities(state = { results: {} }, action) {
   return state
 }
 
+// function results(state = {results: {}, })
+
 // Updates error message to notify about the failed fetches.
 function errorMessage(state = null, action) {
   const { type, error } = action

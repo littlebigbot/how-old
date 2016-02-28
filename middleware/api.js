@@ -17,7 +17,10 @@ function getNextPageUrl(response) {
   return nextLink.split(';')[0].slice(1, -1)
 }
 
-const API_ROOT = 'http://api.themoviedb.org/3'
+// http://api.themoviedb.org/3/search/multi?query=wall&api_key=cfa0adf468d2103f9def27b896a6f917
+// https://www.themoviedb.org/search/remote/multi?query=sean
+// const API_ROOT = 'https://www.themoviedb.org';
+const API_ROOT = 'http://api.themoviedb.org/3';
 const API_KEY = 'cfa0adf468d2103f9def27b896a6f917';
 
 // Fetches an API response and normalizes the result JSON according to schema.
@@ -35,11 +38,10 @@ function callApi(endpoint, schema) {
 
       const camelizedJson = camelizeKeys(json)
       const nextPageUrl = getNextPageUrl(response)
-      console.log(json);
-      // return Object.assign({},
-      //   normalize(camelizedJson, schema),
-      //   { nextPageUrl }
-      // )
+      console.log(nextPageUrl);
+      return {
+        ...normalize(camelizedJson, schema)
+      }
     })
 }
 
@@ -51,24 +53,30 @@ function callApi(endpoint, schema) {
 
 // Read more about Normalizr: https://github.com/gaearon/normalizr
 
-const userSchema = new Schema('users', {
-  idAttribute: 'login'
-})
+// const userSchema = new Schema('users', {
+//   idAttribute: 'login'
+// })
 
-const repoSchema = new Schema('repos', {
-  idAttribute: 'fullName'
-})
+// const repoSchema = new Schema('repos', {
+//   idAttribute: 'fullName'
+// })
 
-repoSchema.define({
-  owner: userSchema
-})
+// repoSchema.define({
+//   owner: userSchema
+// })
+
+const resultSchema = new Schema('results', {
+  idAttribute: 'id'
+});
+
+// const knownFor = new Schema('knownFor')
 
 // Schemas for Github API responses.
 export const Schemas = {
-  USER: userSchema,
-  USER_ARRAY: arrayOf(userSchema),
-  REPO: repoSchema,
-  REPO_ARRAY: arrayOf(repoSchema)
+  RESULT: resultSchema
+  // RESULT_ARRAY: arrayOf(userSchema),
+  // REPO: repoSchema,
+  // REPO_ARRAY: arrayOf(repoSchema)
 }
 
 // Action key that carries API call info interpreted by this Redux middleware.
@@ -111,7 +119,7 @@ export default store => next => action => {
   const [ requestType, successType, failureType ] = types
   next(actionWith({ type: requestType }))
 
-  return callApi(endpoint/*, schema*/).then(
+  return callApi(endpoint, schema).then(
     response => next(actionWith({
       response,
       type: successType

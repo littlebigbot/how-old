@@ -1,4 +1,5 @@
 import { CALL_API, Schemas } from '../middleware/api'
+import { arrayOf } from 'normalizr'
 
 export const SEARCH_REQUEST = 'SEARCH_REQUEST';
 export const SEARCH_SUCCESS = 'SEARCH_SUCCESS';
@@ -8,7 +9,8 @@ export function search(query) {
   return {
     [CALL_API]: {
       types: [ SEARCH_REQUEST, SEARCH_SUCCESS, SEARCH_FAILURE ],
-      endpoint: `/search/multi?query=${query}`
+      endpoint: `/search/multi?query=${query}`,
+      schema: {results: arrayOf(Schemas.RESULT)}
     }
   }
 }

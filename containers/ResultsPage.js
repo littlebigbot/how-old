@@ -33,7 +33,7 @@ class ResultsPage extends Component {
   //   this.props.loadStarred(this.props.login, true)
   // }
 
-  renderResult(repo) {
+  renderResult(result) {
     return (
       <Result result={result} />
     )
