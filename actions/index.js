@@ -9,7 +9,7 @@ export function search(query) {
   return {
     [CALL_API]: {
       types: [ SEARCH_REQUEST, SEARCH_SUCCESS, SEARCH_FAILURE ],
-      endpoint: `/search/multi?query=${query}`,
+      endpoint: `/search/multi?query=${encodeURIComponent(query)}`,
       schema: {results: arrayOf(Schemas.RESULT)}
     }
   }

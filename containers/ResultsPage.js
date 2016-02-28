@@ -23,9 +23,9 @@ class ResultsPage extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const {query, search} = this.props;
+    const { search } = this.props;
     if (nextProps.query !== this.props.query) {
-      search(query);
+      search(nextProps.query);
     }
   }
 
@@ -35,7 +35,7 @@ class ResultsPage extends Component {
 
   renderResult(result) {
     return (
-      <Result result={result} />
+      <Result key={result.id} result={result} />
     )
   }
 
