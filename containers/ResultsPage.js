@@ -40,7 +40,7 @@ class ResultsPage extends Component {
   }
 
   render() {
-    const { results } = this.props
+    const { searchEntity } = this.props
     // if (!person) {
     //   return <h1>Loading</h1>
     // }
@@ -48,9 +48,10 @@ class ResultsPage extends Component {
     // const { starredRepos, starredRepoOwners, starredPagination } = this.props
     return (
       <div>
+        <p>Total results: {searchEntity.total_results}</p>
         <hr />
         <List renderItem={this.renderResult}
-              items={results}
+              items={searchEntity.results}
               onLoadMoreClick={this.handleLoadMoreClick} />
       </div>
     )
@@ -59,7 +60,7 @@ class ResultsPage extends Component {
 
 ResultsPage.propTypes = {
   // login: PropTypes.string.isRequired,
-  results: PropTypes.object,
+  searchResults: PropTypes.object,
   // starredPagination: PropTypes.object,
   // starredRepos: PropTypes.array.isRequired,
   // starredRepoOwners: PropTypes.array.isRequired,
@@ -69,14 +70,14 @@ ResultsPage.propTypes = {
 
 function mapStateToProps(state, ownProps) {
   const { query } = ownProps.params
-  const { results } = state.entities
+  const { searchEntity } = state.entities
 
   // const starredPagination = starredByUser[login] || { ids: [] }
   // const starredRepos = starredPagination.ids.map(id => repos[id])
   // const starredRepoOwners = starredRepos.map(repo => users[repo.owner])
 
   return {
-    results,
+    searchEntity,
     query
     // starredRepos,
     // starredRepoOwners,

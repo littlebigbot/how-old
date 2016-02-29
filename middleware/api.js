@@ -1,34 +1,42 @@
 import { Schema, arrayOf, normalize } from 'normalizr'
 import { camelizeKeys } from 'humps'
+import { map, join, isUndefined } from 'lodash';
 import 'isomorphic-fetch'
 
-// Extracts the next page URL from Github API response.
-function getNextPageUrl(response) {
-  const link = response.headers.get('link')
-  if (!link) {
-    return null
-  }
-
-  const nextLink = link.split(',').find(s => s.indexOf('rel="next"') > -1)
-  if (!nextLink) {
-    return null
-  }
-
-  return nextLink.split(';')[0].slice(1, -1)
-}
-
-// http://api.themoviedb.org/3/search/multi?query=wall&api_key=cfa0adf468d2103f9def27b896a6f917
-// https://www.themoviedb.org/search/remote/multi?query=sean
-// const API_ROOT = 'https://www.themoviedb.org';
 const API_ROOT = 'http://api.themoviedb.org/3';
 const API_KEY = 'cfa0adf468d2103f9def27b896a6f917';
 
+// function buildNextUrl(response, url, data) {
+//   if(response.page < response.totalPages) {
+//     return `${url}?${serialize({
+//       ...data,
+//       api_key: API_KEY,
+//       page: data.page + 1
+//     })}`;
+//   }
+
+//   return `${url}?${serialize({...data, api_key: API_KEY})}`;
+// };
+
+function serialize(obj) {
+  return join(map(obj, (val, key) => {
+    if(!isUndefined(val)) {
+      return `${key}=${encodeURIComponent(val)}`;
+    }
+  }), '&');
+}
+
+function makeUrl(endpoint) {
+  return (endpoint.indexOf(API_ROOT) === -1) ? API_ROOT + endpoint : endpoint;
+}
+
 // Fetches an API response and normalizes the result JSON according to schema.
 // This makes every API response have the same shape, regardless of how nested it was.
-function callApi(endpoint, schema) {
-  const fullUrl = ((endpoint.indexOf(API_ROOT) === -1) ? API_ROOT + endpoint : endpoint ) + `&api_key=${API_KEY}`
+function callApi(config) {
+  const { endpoint, data, key } = config;
+  const url = makeUrl(endpoint);
 
-  return fetch(fullUrl)
+  return fetch(`${url}?${serialize({...data, api_key: API_KEY})}`)
     .then(response =>
       response.json().then(json => ({ json, response }))
     ).then(({ json, response }) => {
@@ -37,47 +45,27 @@ function callApi(endpoint, schema) {
       }
 
       const camelizedJson = camelizeKeys(json)
-      const nextPageUrl = getNextPageUrl(response)
-      console.log(nextPageUrl);
+      // return {
+      //   ...normalize(camelizedJson, schema)
+      // }
+      console.log(camelizedJson)
       return {
-        ...normalize(camelizedJson, schema)
+        entities: {
+          ...camelizedJson
+        },
+        key
+        // nextUrl: buildNextUrl(json, url, data)
       }
     })
 }
 
-// We use this Normalizr schemas to transform API responses from a nested form
-// to a flat form where repos and users are placed in `entities`, and nested
-// JSON objects are replaced with their IDs. This is very convenient for
-// consumption by reducers, because we can easily build a normalized tree
-// and keep it updated as we fetch more data.
-
-// Read more about Normalizr: https://github.com/gaearon/normalizr
-
-// const userSchema = new Schema('users', {
-//   idAttribute: 'login'
-// })
-
-// const repoSchema = new Schema('repos', {
-//   idAttribute: 'fullName'
-// })
-
-// repoSchema.define({
-//   owner: userSchema
-// })
-
-const resultSchema = new Schema('results', {
+const resultSchema = new Schema('searchResults', {
   idAttribute: 'id'
 });
 
-// const knownFor = new Schema('knownFor')
-
-// Schemas for Github API responses.
 export const Schemas = {
   RESULT: resultSchema
-  // RESULT_ARRAY: arrayOf(userSchema),
-  // REPO: repoSchema,
-  // REPO_ARRAY: arrayOf(repoSchema)
-}
+};
 
 // Action key that carries API call info interpreted by this Redux middleware.
 export const CALL_API = Symbol('Call API')
@@ -91,7 +79,7 @@ export default store => next => action => {
   }
 
   let { endpoint } = callAPI
-  const { schema, types } = callAPI
+  const { key, types } = callAPI
 
   if (typeof endpoint === 'function') {
     endpoint = endpoint(store.getState())
@@ -119,7 +107,7 @@ export default store => next => action => {
   const [ requestType, successType, failureType ] = types
   next(actionWith({ type: requestType }))
 
-  return callApi(endpoint, schema).then(
+  return callApi(callAPI).then(
     response => next(actionWith({
       response,
       type: successType
