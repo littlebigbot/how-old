@@ -5,17 +5,26 @@ import { routerReducer as routing } from 'react-router-redux';
 import { combineReducers } from 'redux';
 
 // Updates an entity cache in response to any action with response.entities.
-function entities(state = { searchEntity: {} }, action) {
+function entities(state = { searchEntity: { isFetching: false } }, action) {
   console.log(action)
   if (action.response && action.response.entities) {
 
     return {
       ...state,
-      [action.response.key]: {
-        ...action.response.entities
+      [action.key]: {
+        ...action.response.entities,
+        isFetching: action.isFetching
       }
     }
     // return merge({}, state, action.response.entities)
+  }
+  if(action.key) {
+    return {
+      ...state,
+      [action.key]: {
+        isFetching: action.isFetching
+      }
+    }
   }
 
   return state

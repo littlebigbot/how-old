@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react'
-import { map } from 'lodash';
+import { map, isEmpty } from 'lodash';
 
 export default class List extends Component {
   // renderLoadMore() {
@@ -16,16 +16,17 @@ export default class List extends Component {
   render() {
     const {
       isFetching, nextPageUrl, pageCount,
-      items, renderItem, loadingLabel
+      items, renderItem, loadingLabel,
+      totalResults
     } = this.props
 
-    const isEmpty = items.length === 0
-    if (isEmpty && isFetching) {
+    const isListEmpty = isEmpty(items);
+    if (isFetching) {
       return <h2><i>{loadingLabel}</i></h2>
     }
 
     const isLastPage = !nextPageUrl
-    if (isEmpty && isLastPage) {
+    if (isListEmpty && (isLastPage || totalResults)) {
       return <h1><i>Nothing here!</i></h1>
     }
 
@@ -49,6 +50,6 @@ List.propTypes = {
 }
 
 List.defaultProps = {
-  isFetching: true,
+  // isFetching: true,
   loadingLabel: 'Loading...'
 }

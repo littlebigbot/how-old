@@ -52,8 +52,7 @@ function callApi(config) {
       return {
         entities: {
           ...camelizedJson
-        },
-        key
+        }
         // nextUrl: buildNextUrl(json, url, data)
       }
     })
@@ -105,15 +104,19 @@ export default store => next => action => {
   }
 
   const [ requestType, successType, failureType ] = types
-  next(actionWith({ type: requestType }))
+  next(actionWith({ type: requestType, isFetching: true, key }))
 
   return callApi(callAPI).then(
     response => next(actionWith({
       response,
-      type: successType
+      key,
+      type: successType,
+      isFetching: false
     })),
     error => next(actionWith({
       type: failureType,
+      isFetching: false,
+      key,
       error: error.message || 'Something bad happened'
     }))
   )

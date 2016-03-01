@@ -48,10 +48,11 @@ class ResultsPage extends Component {
     // const { starredRepos, starredRepoOwners, starredPagination } = this.props
     return (
       <div>
-        <p>Total results: {searchEntity.total_results}</p>
+        <p>Total results: {searchEntity.totalResults}</p>
         <hr />
         <List renderItem={this.renderResult}
               items={searchEntity.results}
+              isFetching={searchEntity.isFetching}
               onLoadMoreClick={this.handleLoadMoreClick} />
       </div>
     )
