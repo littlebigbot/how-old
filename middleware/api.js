@@ -87,9 +87,9 @@ export default store => next => action => {
   if (typeof endpoint !== 'string') {
     throw new Error('Specify a string endpoint URL.')
   }
-  // if (!schema) {
-  //   throw new Error('Specify one of the exported Schemas.')
-  // }
+  if (!key) {
+    throw new Error('Specify a key.')
+  }
   if (!Array.isArray(types) || types.length !== 3) {
     throw new Error('Expected an array of three action types.')
   }
@@ -104,7 +104,12 @@ export default store => next => action => {
   }
 
   const [ requestType, successType, failureType ] = types
-  next(actionWith({ type: requestType, isFetching: true, key }))
+
+  next(actionWith({
+    type: requestType,
+    isFetching: true,
+    key
+  }))
 
   return callApi(callAPI).then(
     response => next(actionWith({

@@ -2,38 +2,41 @@ import React, { Component, PropTypes } from 'react'
 import { map, isEmpty } from 'lodash';
 
 export default class List extends Component {
-  // renderLoadMore() {
-  //   const { isFetching, onLoadMoreClick } = this.props
-  //   return (
-  //     <button style={{ fontSize: '150%' }}
-  //             onClick={onLoadMoreClick}
-  //             disabled={isFetching}>
-  //       {isFetching ? 'Loading...' : 'Load More'}
-  //     </button>
-  //   )
-  // }
+  renderLoadMore() {
+    const { isFetching, onLoadMoreClick } = this.props
+    console.log(this)
+    return (
+      <button style={{ fontSize: '150%' }}
+              onClick={onLoadMoreClick}
+              disabled={isFetching}>
+        {isFetching ? 'Loading...' : 'Load More'}
+      </button>
+    )
+  }
 
   render() {
     const {
-      isFetching, nextPageUrl, pageCount,
-      items, renderItem, loadingLabel,
-      totalResults
+      isFetching, items,
+      renderItem, loadingLabel,
+      totalPages,
+      currentPage
     } = this.props
 
     const isListEmpty = isEmpty(items);
-    if (isFetching) {
+    const isLastPage = currentPage === totalPages;
+
+    if (isFetching && items.length === 0) {
       return <h2><i>{loadingLabel}</i></h2>
     }
 
-    const isLastPage = !nextPageUrl
-    if (isListEmpty && (isLastPage || totalResults)) {
+    if (isListEmpty && isLastPage) {
       return <h1><i>Nothing here!</i></h1>
     }
 
     return (
       <div>
         {map(items, renderItem)}
-        {pageCount > 0 && !isLastPage && this.renderLoadMore()}
+        {(currentPage > 0 && !isLastPage) && this.renderLoadMore()}
       </div>
     )
   }
@@ -45,7 +48,7 @@ List.propTypes = {
   renderItem: PropTypes.func.isRequired,
   // items: PropTypes.array.isRequired,
   isFetching: PropTypes.bool.isRequired,
-  // onLoadMoreClick: PropTypes.func.isRequired,
+  onLoadMoreClick: PropTypes.func.isRequired,
   // nextPageUrl: PropTypes.string
 }
 

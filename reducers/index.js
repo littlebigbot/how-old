@@ -8,7 +8,24 @@ import { combineReducers } from 'redux';
 function entities(state = { searchEntity: { isFetching: false } }, action) {
   console.log(action)
   if (action.response && action.response.entities) {
-
+    if(action.type === ActionTypes.LOAD_MORE_SEARCH_SUCCESS) {
+      console.log({
+        ...state,
+        [action.key]: {
+          ...action.response.entities,
+          results: [...state[action.key].results, ...action.response.entities.results],
+          isFetching: action.isFetching
+        }
+      });
+      return {
+        ...state,
+        [action.key]: {
+          ...action.response.entities,
+          results: [...state[action.key].results, ...action.response.entities.results],
+          isFetching: action.isFetching
+        }
+      }
+    }
     return {
       ...state,
       [action.key]: {
@@ -18,10 +35,12 @@ function entities(state = { searchEntity: { isFetching: false } }, action) {
     }
     // return merge({}, state, action.response.entities)
   }
+
   if(action.key) {
     return {
       ...state,
       [action.key]: {
+        ...state[action.key],
         isFetching: action.isFetching
       }
     }

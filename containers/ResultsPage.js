@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-import { search } from '../actions'
+import { search, loadMoreSearch } from '../actions'
 import Result from '../components/Result'
 import List from '../components/List'
 import zip from 'lodash/zip'
@@ -14,7 +14,7 @@ class ResultsPage extends Component {
   constructor(props) {
     super(props)
     // this.renderRepo = this.renderRepo.bind(this)
-    // this.handleLoadMoreClick = this.handleLoadMoreClick.bind(this)
+    this.handleLoadMoreClick = this.handleLoadMoreClick.bind(this)
   }
 
   componentWillMount() {
@@ -29,9 +29,12 @@ class ResultsPage extends Component {
     }
   }
 
-  // handleLoadMoreClick() {
-  //   this.props.loadStarred(this.props.login, true)
-  // }
+  handleLoadMoreClick() {
+    console.log(this.props)
+    const { loadMoreSearch, query, searchEntity } = this.props;
+
+    loadMoreSearch(query, searchEntity.page + 1);
+  }
 
   renderResult(result) {
     return (
@@ -53,6 +56,8 @@ class ResultsPage extends Component {
         <List renderItem={this.renderResult}
               items={searchEntity.results}
               isFetching={searchEntity.isFetching}
+              currentPage={searchEntity.page}
+              totalPages={searchEntity.totalPages}
               onLoadMoreClick={this.handleLoadMoreClick} />
       </div>
     )
@@ -89,5 +94,5 @@ function mapStateToProps(state, ownProps) {
 
 export default connect(mapStateToProps, {
   search,
-  // loadStarred
+  loadMoreSearch
 })(ResultsPage)
