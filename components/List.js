@@ -25,7 +25,7 @@ export default class List extends Component {
     const isListEmpty = isEmpty(items);
     const isLastPage = currentPage === totalPages;
 
-    if (isFetching && items.length === 0) {
+    if (isFetching && (items && items.length === 0)) {
       return <h2><i>{loadingLabel}</i></h2>
     }
 

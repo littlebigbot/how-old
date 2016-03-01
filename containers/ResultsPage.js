@@ -52,6 +52,7 @@ class ResultsPage extends Component {
     return (
       <div>
         <p>Total results: {searchEntity.totalResults}</p>
+        {searchEntity.results && <p>Loaded results: {searchEntity.results.length}</p>}
         <hr />
         <List renderItem={this.renderResult}
               items={searchEntity.results}
