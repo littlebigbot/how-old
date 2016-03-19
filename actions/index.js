@@ -1,5 +1,4 @@
 import { CALL_API, Schemas } from '../middleware/api'
-import { arrayOf } from 'normalizr'
 
 export const SEARCH_REQUEST = 'SEARCH_REQUEST';
 export const SEARCH_SUCCESS = 'SEARCH_SUCCESS';
@@ -13,7 +12,8 @@ export function search(query) {
       data: {
         query
       },
-      key: 'searchEntity'
+      // key: 'searchResults',
+      // schema: Schemas.SEARCH
     }
   }
 }
@@ -31,10 +31,40 @@ export function loadMoreSearch(query, page) {
         query,
         page
       },
-      key: 'searchEntity'
+      // key: 'searchResults',
+      schema: Schemas.SEARCH
     }
   }
 }
+
+export const LOAD_MEDIA_REQUEST = 'LOAD_MEDIA_REQUEST';
+export const LOAD_MEDIA_SUCCESS = 'LOAD_MEDIA_SUCCESS';
+export const LOAD_MEDIA_FAILURE = 'LOAD_MEDIA_FAILURE';
+
+export function loadMedia(mediaType, id) {
+  return {
+    [CALL_API]: {
+      types: [ LOAD_MEDIA_REQUEST, LOAD_MEDIA_SUCCESS, LOAD_MEDIA_FAILURE ],
+      endpoint: `/${mediaType}/${id}`,
+      key: 'media',
+      schema: Schemas.MEDIA
+    }
+  }
+};
+
+// export const LOAD_EXTRA_INFO_REQUEST = 'LOAD_EXTRA_INFO_REQUEST';
+// export const LOAD_EXTRA_INFO_SUCCESS = 'LOAD_EXTRA_INFO_SUCCESS';
+// export const LOAD_EXTRA_INFO_FAILURE = 'LOAD_EXTRA_INFO_FAILURE';
+
+// export function loadMedia(mediaType, id) {
+//   return {
+//     [CALL_API]: {
+//       types: [ LOAD_EXTRA_INFO_REQUEST, LOAD_EXTRA_INFO_SUCCESS, LOAD_EXTRA_INFO_FAILURE ],
+//       endpoint: `/${mediaType}/${id}`,
+//       key: 'searchResults'
+//     }
+//   }
+// };
 
 export const RESET_ERROR_MESSAGE = 'RESET_ERROR_MESSAGE'
 

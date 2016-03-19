@@ -33,7 +33,7 @@ function makeUrl(endpoint) {
 // Fetches an API response and normalizes the result JSON according to schema.
 // This makes every API response have the same shape, regardless of how nested it was.
 function callApi(config) {
-  const { endpoint, data, key } = config;
+  const { endpoint, data, key, schema } = config;
   const url = makeUrl(endpoint);
 
   return fetch(`${url}?${serialize({...data, api_key: API_KEY})}`)
@@ -45,16 +45,18 @@ function callApi(config) {
       }
 
       const camelizedJson = camelizeKeys(json)
-      // return {
-      //   ...normalize(camelizedJson, schema)
-      // }
-      console.log(camelizedJson)
-      return {
-        entities: {
-          ...camelizedJson
-        }
-        // nextUrl: buildNextUrl(json, url, data)
+      console.log(camelizedJson);
+      if(schema) {
+        return normalize(camelizedJson, schema);
       }
+      return camelizedJson;
+      // console.log(camelizedJson)
+      // return {
+      //   entities: {
+      //     ...camelizedJson
+      //   }
+      //   // nextUrl: buildNextUrl(json, url, data)
+      // }
     })
 }
 
@@ -62,8 +64,13 @@ const resultSchema = new Schema('searchResults', {
   idAttribute: 'id'
 });
 
+const mediaSchema = new Schema('media', {
+  idAttribute: 'id'
+});
+
 export const Schemas = {
-  RESULT: resultSchema
+  SEARCH: {results: arrayOf(resultSchema)},
+  MEDIA: mediaSchema
 };
 
 // Action key that carries API call info interpreted by this Redux middleware.
@@ -73,6 +80,7 @@ export const CALL_API = Symbol('Call API')
 // Performs the call and promises when such actions are dispatched.
 export default store => next => action => {
   const callAPI = action[CALL_API]
+
   if (typeof callAPI === 'undefined') {
     return next(action)
   }
@@ -87,9 +95,9 @@ export default store => next => action => {
   if (typeof endpoint !== 'string') {
     throw new Error('Specify a string endpoint URL.')
   }
-  if (!key) {
-    throw new Error('Specify a key.')
-  }
+  // if (!key) {
+  //   throw new Error('Specify a key.')
+  // }
   if (!Array.isArray(types) || types.length !== 3) {
     throw new Error('Expected an array of three action types.')
   }
@@ -105,23 +113,15 @@ export default store => next => action => {
 
   const [ requestType, successType, failureType ] = types
 
-  next(actionWith({
-    type: requestType,
-    isFetching: true,
-    key
-  }))
+  next(actionWith({type: requestType}))
 
   return callApi(callAPI).then(
     response => next(actionWith({
       response,
-      key,
-      type: successType,
-      isFetching: false
+      type: successType
     })),
     error => next(actionWith({
       type: failureType,
-      isFetching: false,
-      key,
       error: error.message || 'Something bad happened'
     }))
   )

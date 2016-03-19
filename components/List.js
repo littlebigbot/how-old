@@ -15,6 +15,7 @@ export default class List extends Component {
   }
 
   render() {
+    console.log(this);
     const {
       isFetching, items,
       renderItem, loadingLabel,

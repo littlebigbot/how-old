@@ -1,19 +1,12 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-import { search, loadMoreSearch } from '../actions'
+import { search, loadMoreSearch, loadExtraInfo } from '../actions'
 import Result from '../components/Result'
 import List from '../components/List'
-import zip from 'lodash/zip'
-
-// function search(props) {
-//   const { query } = props
-//   props.search(query)
-// }
 
 class ResultsPage extends Component {
   constructor(props) {
     super(props)
-    // this.renderRepo = this.renderRepo.bind(this)
     this.handleLoadMoreClick = this.handleLoadMoreClick.bind(this)
   }
 
@@ -31,9 +24,9 @@ class ResultsPage extends Component {
 
   handleLoadMoreClick() {
     console.log(this.props)
-    const { loadMoreSearch, query, searchEntity } = this.props;
+    const { loadMoreSearch, query, searchResults } = this.props;
 
-    loadMoreSearch(query, searchEntity.page + 1);
+    loadMoreSearch(query, searchResults.page + 1);
   }
 
   renderResult(result) {
@@ -43,22 +36,21 @@ class ResultsPage extends Component {
   }
 
   render() {
-    const { searchEntity } = this.props
+    const { searchResults } = this.props
     // if (!person) {
     //   return <h1>Loading</h1>
     // }
 
-    // const { starredRepos, starredRepoOwners, starredPagination } = this.props
     return (
       <div>
-        <p>Total results: {searchEntity.totalResults}</p>
-        {searchEntity.results && <p>Loaded results: {searchEntity.results.length}</p>}
+        <p>Total results: {searchResults.totalResults}</p>
+        {searchResults.results && <p>Loaded results: {searchResults.results.length}</p>}
         <hr />
         <List renderItem={this.renderResult}
-              items={searchEntity.results}
-              isFetching={searchEntity.isFetching}
-              currentPage={searchEntity.page}
-              totalPages={searchEntity.totalPages}
+              items={searchResults.catalog}
+              isFetching={searchResults.isFetching}
+              currentPage={searchResults.page}
+              totalPages={searchResults.totalPages}
               onLoadMoreClick={this.handleLoadMoreClick} />
       </div>
     )
@@ -66,34 +58,22 @@ class ResultsPage extends Component {
 }
 
 ResultsPage.propTypes = {
-  // login: PropTypes.string.isRequired,
   searchResults: PropTypes.object,
-  // starredPagination: PropTypes.object,
-  // starredRepos: PropTypes.array.isRequired,
-  // starredRepoOwners: PropTypes.array.isRequired,
   search: PropTypes.func.isRequired,
-  // loadStarred: PropTypes.func.isRequired
 }
 
 function mapStateToProps(state, ownProps) {
   const { query } = ownProps.params
-  const { searchEntity } = state.entities
-
-  // const starredPagination = starredByUser[login] || { ids: [] }
-  // const starredRepos = starredPagination.ids.map(id => repos[id])
-  // const starredRepoOwners = starredRepos.map(repo => users[repo.owner])
+  const { searchResults } = state;
 
   return {
-    searchEntity,
+    searchResults,
     query
-    // starredRepos,
-    // starredRepoOwners,
-    // starredPagination,
-    // user: users[login]
   }
 }
 
 export default connect(mapStateToProps, {
   search,
-  loadMoreSearch
+  loadMoreSearch,
+  loadExtraInfo
 })(ResultsPage)

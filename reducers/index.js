@@ -5,35 +5,23 @@ import { routerReducer as routing } from 'react-router-redux';
 import { combineReducers } from 'redux';
 
 // Updates an entity cache in response to any action with response.entities.
-function entities(state = { searchEntity: { isFetching: false } }, action) {
-  console.log(action)
+function entities(
+  state = {
+    searchResults: {isFetching: false},
+    media: {isFetching: false}
+  },
+  action
+) {
   if (action.response && action.response.entities) {
-    if(action.type === ActionTypes.LOAD_MORE_SEARCH_SUCCESS) {
-      console.log({
-        ...state,
-        [action.key]: {
-          ...action.response.entities,
-          results: [...state[action.key].results, ...action.response.entities.results],
-          isFetching: action.isFetching
-        }
-      });
-      return {
-        ...state,
-        [action.key]: {
-          ...action.response.entities,
-          results: [...state[action.key].results, ...action.response.entities.results],
-          isFetching: action.isFetching
-        }
-      }
-    }
+
     return {
       ...state,
       [action.key]: {
         ...action.response.entities,
         isFetching: action.isFetching
       }
-    }
-    // return merge({}, state, action.response.entities)
+    };
+
   }
 
   if(action.key) {
@@ -47,6 +35,48 @@ function entities(state = { searchEntity: { isFetching: false } }, action) {
   }
 
   return state
+}
+
+function media(state = {isFetching: false}, action) {
+  return {
+    ...state
+  }
+  return state;
+}
+
+function searchResults(state = {isFetching: false}, action) {
+  switch(action.type) {
+    case ActionTypes.LOAD_DETAIL_SUCCESS:
+      return {
+        ...state,
+        [data.id]: {
+          ...state[data.id],
+          ...action.response.entities,
+          isFetching: false
+        }
+      };
+    case ActionTypes.LOAD_MORE_SEARCH_SUCCESS:
+      return {
+        ...state,
+        results: { ...state.results, ...action.response.entities },
+        isFetching: false
+      };
+    case ActionTypes.SEARCH_SUCCESS:
+      return {
+        ...state,
+        catalog: action.response.results,
+        page: action.response.page,
+        totalResults: action.response.totalResults,
+        isFetching: false
+      };
+    default:
+      return {
+        ...state,
+        isFetching: true
+      }
+  }
+
+  return state;
 }
 
 // If we normalize, we need to save the metadata.
@@ -80,9 +110,8 @@ function errorMessage(state = null, action) {
 
 
 const rootReducer = combineReducers({
-  // meta,
-  entities,
-  // pagination,
+  // entities,
+  searchResults,
   errorMessage,
   routing
 })
