@@ -62,9 +62,10 @@ App.propTypes = {
 }
 
 function mapStateToProps(state, ownProps) {
+  console.log(ownProps.location.pathname);
   return {
     errorMessage: state.errorMessage,
-    inputValue: ownProps.location.pathname.substring(1)
+    inputValue: ownProps.location.pathname.split('/').length === 2 ? decodeURIComponent(ownProps.location.pathname.substring(1)) : ''
   }
 }
 

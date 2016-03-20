@@ -3,11 +3,12 @@ import { connect } from 'react-redux'
 import { search, loadMoreSearch, loadExtraInfo } from '../actions'
 import Result from '../components/Result'
 import List from '../components/List'
+import _ from 'lodash';
 
 class ResultsPage extends Component {
   constructor(props) {
     super(props)
-    this.handleLoadMoreClick = this.handleLoadMoreClick.bind(this)
+    // this.handleLoadMoreClick = this.handleLoadMoreClick.bind(this)
   }
 
   componentWillMount() {
@@ -22,13 +23,6 @@ class ResultsPage extends Component {
     }
   }
 
-  handleLoadMoreClick() {
-    console.log(this.props)
-    const { loadMoreSearch, query, searchResults } = this.props;
-
-    loadMoreSearch(query, searchResults.page + 1);
-  }
-
   renderResult(result) {
     return (
       <Result key={result.id} result={result} />
@@ -36,23 +30,17 @@ class ResultsPage extends Component {
   }
 
   render() {
-    const { searchResults } = this.props
-    // if (!person) {
-    //   return <h1>Loading</h1>
-    // }
-
+    const { searchResults, isFetching } = this.props
+    // @TODO figure out why `searchResults` is undefined when `isFetching` is false
+    if (isFetching || _.isUndefined(searchResults)) {
+      return <h1>Loading</h1>
+    }
     return (
-      <div>
-        <p>Total results: {searchResults.totalResults}</p>
-        {searchResults.results && <p>Loaded results: {searchResults.results.length}</p>}
-        <hr />
-        <List renderItem={this.renderResult}
-              items={searchResults.catalog}
-              isFetching={searchResults.isFetching}
-              currentPage={searchResults.page}
-              totalPages={searchResults.totalPages}
-              onLoadMoreClick={this.handleLoadMoreClick} />
-      </div>
+      <List renderItem={this.renderResult}
+            items={searchResults.catalog}
+            isFetching={isFetching}
+            currentPage={searchResults.page}
+            totalPages={searchResults.totalPages} />
     )
   }
 }
@@ -67,8 +55,9 @@ function mapStateToProps(state, ownProps) {
   const { searchResults } = state;
 
   return {
-    searchResults,
-    query
+    searchResults: searchResults[query.toLowerCase()],
+    query,
+    isFetching: searchResults.isFetching
   }
 }
 

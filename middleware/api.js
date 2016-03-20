@@ -26,6 +26,21 @@ function serialize(obj) {
   }), '&');
 }
 
+// function processSearch(query, results) {
+
+//   // return {
+//   //   [query]: results
+//   // }
+//   return _.map(results, (result) => {
+//     switch(result.mediaType) {
+//       case 'person':
+
+//       case 'tv':
+//       case 'movie':
+//     }
+//   });
+// }
+
 function makeUrl(endpoint) {
   return (endpoint.indexOf(API_ROOT) === -1) ? API_ROOT + endpoint : endpoint;
 }
@@ -86,7 +101,7 @@ export default store => next => action => {
   }
 
   let { endpoint } = callAPI
-  const { key, types } = callAPI
+  const { key, types, query } = callAPI
 
   if (typeof endpoint === 'function') {
     endpoint = endpoint(store.getState())
@@ -118,7 +133,8 @@ export default store => next => action => {
   return callApi(callAPI).then(
     response => next(actionWith({
       response,
-      type: successType
+      type: successType,
+      query
     })),
     error => next(actionWith({
       type: failureType,

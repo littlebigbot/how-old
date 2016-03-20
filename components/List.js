@@ -2,17 +2,17 @@ import React, { Component, PropTypes } from 'react'
 import { map, isEmpty } from 'lodash';
 
 export default class List extends Component {
-  renderLoadMore() {
-    const { isFetching, onLoadMoreClick } = this.props
-    console.log(this)
-    return (
-      <button style={{ fontSize: '150%' }}
-              onClick={onLoadMoreClick}
-              disabled={isFetching}>
-        {isFetching ? 'Loading...' : 'Load More'}
-      </button>
-    )
-  }
+  // renderLoadMore() {
+  //   const { isFetching, onLoadMoreClick } = this.props
+  //   console.log(this)
+  //   return (
+  //     <button style={{ fontSize: '150%' }}
+  //             onClick={onLoadMoreClick}
+  //             disabled={isFetching}>
+  //       {isFetching ? 'Loading...' : 'Load More'}
+  //     </button>
+  //   )
+  // }
 
   render() {
     console.log(this);
@@ -37,7 +37,6 @@ export default class List extends Component {
     return (
       <div>
         {map(items, renderItem)}
-        {(currentPage > 0 && !isLastPage) && this.renderLoadMore()}
       </div>
     )
   }
@@ -47,10 +46,9 @@ List.propTypes = {
   loadingLabel: PropTypes.string.isRequired,
   // pageCount: PropTypes.number,
   renderItem: PropTypes.func.isRequired,
-  // items: PropTypes.array.isRequired,
+  items: PropTypes.array.isRequired,
   isFetching: PropTypes.bool.isRequired,
-  onLoadMoreClick: PropTypes.func.isRequired,
-  // nextPageUrl: PropTypes.string
+  // onLoadMoreClick: PropTypes.func.isRequired,
 }
 
 List.defaultProps = {

@@ -46,33 +46,40 @@ function media(state = {isFetching: false}, action) {
 
 function searchResults(state = {isFetching: false}, action) {
   switch(action.type) {
-    case ActionTypes.LOAD_DETAIL_SUCCESS:
+    // case ActionTypes.LOAD_DETAIL_SUCCESS:
+    //   return {
+    //     ...state,
+    //     [data.id]: {
+    //       ...state[data.id],
+    //       ...action.response.entities,
+    //       isFetching: false
+    //     }
+    //   };
+    // case ActionTypes.LOAD_MORE_SEARCH_SUCCESS:
+    //   return {
+    //     ...state,
+    //     results: { ...state.results, ...action.response.entities },
+    //     isFetching: false
+    //   };
+    case ActionTypes.SEARCH_REQUEST:
       return {
         ...state,
-        [data.id]: {
-          ...state[data.id],
-          ...action.response.entities,
-          isFetching: false
-        }
-      };
-    case ActionTypes.LOAD_MORE_SEARCH_SUCCESS:
-      return {
-        ...state,
-        results: { ...state.results, ...action.response.entities },
-        isFetching: false
-      };
+        isFetching: true
+      }
     case ActionTypes.SEARCH_SUCCESS:
       return {
         ...state,
-        catalog: action.response.results,
-        page: action.response.page,
-        totalResults: action.response.totalResults,
+        [action.query.toLowerCase()]: {
+          catalog: action.response.results,
+          page: action.response.page,
+          totalResults: action.response.totalResults,
+        },
         isFetching: false
       };
     default:
       return {
         ...state,
-        isFetching: true
+        isFetching: false
       }
   }
 

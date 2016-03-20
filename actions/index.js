@@ -1,19 +1,32 @@
 import { CALL_API, Schemas } from '../middleware/api'
+import _ from 'lodash';
 
 export const SEARCH_REQUEST = 'SEARCH_REQUEST';
 export const SEARCH_SUCCESS = 'SEARCH_SUCCESS';
 export const SEARCH_FAILURE = 'SEARCH_FAILURE';
+export const SEARCH_WITH_PREVIOUS_QUERY = 'SEARCH_WITH_PREVIOUS_QUERY';
 
 export function search(query) {
-  return {
-    [CALL_API]: {
-      types: [ SEARCH_REQUEST, SEARCH_SUCCESS, SEARCH_FAILURE ],
-      endpoint: `/search/multi`,
-      data: {
+  return (dispatch, getState) => {
+    const { searchResults } = getState();
+    if(searchResults[query.toLowerCase()]) {
+      return dispatch({
+        type: SEARCH_WITH_PREVIOUS_QUERY,
         query
-      },
-      // key: 'searchResults',
-      // schema: Schemas.SEARCH
+      });
+    } else {
+      return dispatch({
+        [CALL_API]: {
+          types: [ SEARCH_REQUEST, SEARCH_SUCCESS, SEARCH_FAILURE ],
+          endpoint: `/search/multi`,
+          data: {
+            query
+          },
+          query
+          // key: 'searchResults',
+          // schema: Schemas.SEARCH
+        }
+      })
     }
   }
 }
@@ -32,7 +45,7 @@ export function loadMoreSearch(query, page) {
         page
       },
       // key: 'searchResults',
-      schema: Schemas.SEARCH
+      // schema: Schemas.SEARCH
     }
   }
 }
