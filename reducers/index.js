@@ -1,40 +1,81 @@
 import * as ActionTypes from '../actions';
-import { merge, keys } from 'lodash';
+import { merge, keys, reduce, map } from 'lodash';
 import paginate from './paginate';
 import { routerReducer as routing } from 'react-router-redux';
 import { combineReducers } from 'redux';
 
 // Updates an entity cache in response to any action with response.entities.
-function entities(
-  state = {
-    searchResults: {isFetching: false},
-    media: {isFetching: false}
-  },
-  action
-) {
-  if (action.response && action.response.entities) {
+// function entities(
+//   state = {
+//     searchResults: {isFetching: false},
+//     media: {isFetching: false}
+//   },
+//   action
+// ) {
+//   if (action.response && action.response.entities) {
 
-    return {
-      ...state,
-      [action.key]: {
-        ...action.response.entities,
-        isFetching: action.isFetching
+//     return {
+//       ...state,
+//       [action.key]: {
+//         ...action.response.entities,
+//         isFetching: action.isFetching
+//       }
+//     };
+
+//   }
+
+//   if(action.key) {
+//     return {
+//       ...state,
+//       [action.key]: {
+//         ...state[action.key],
+//         isFetching: action.isFetching
+//       }
+//     }
+//   }
+
+//   return state
+// }
+
+function entities(state = {}, action) {
+  switch(action.type) {
+    case ActionTypes.SEARCH_SUCCESS:
+      return {
+        ...reduce(action.response.results, (accumulator, result) => {
+          return {
+            ...accumulator,
+            [result.id]: result
+          };
+        }, {}),
+        ...state //after, as to not overwrite the expanded media
+      };
+    case ActionTypes.LOAD_MEDIA_REQUEST:
+      return {
+        ...state,
+        [action.id]: {
+          ...state[action.id],
+          isFetching: true
+        }
       }
-    };
-
-  }
-
-  if(action.key) {
-    return {
-      ...state,
-      [action.key]: {
-        ...state[action.key],
-        isFetching: action.isFetching
+    case ActionTypes.LOAD_MEDIA_SUCCESS:
+      return {
+        ...state,
+        [action.id]: {
+          ...action.response,
+          isFetching: false
+        }
       }
-    }
+    case ActionTypes.LOAD_MEDIA_REQUEST:
+      return {
+        ...state,
+        [action.id]: {
+          ...state[action.id],
+          isFetching: false
+        }
+      }
+    default:
+      return state;
   }
-
-  return state
 }
 
 function media(state = {isFetching: false}, action) {
@@ -70,7 +111,7 @@ function searchResults(state = {isFetching: false}, action) {
       return {
         ...state,
         [action.query.toLowerCase()]: {
-          catalog: action.response.results,
+          catalog: map(data, result => result.id),
           page: action.response.page,
           totalResults: action.response.totalResults,
         },
@@ -117,7 +158,7 @@ function errorMessage(state = null, action) {
 
 
 const rootReducer = combineReducers({
-  // entities,
+  entities,
   searchResults,
   errorMessage,
   routing

@@ -23,21 +23,22 @@ class ResultsPage extends Component {
     }
   }
 
-  renderResult(result) {
+  renderResult(entities, key) {
     return (
-      <Result key={result.id} result={result} />
+      <Result key={key} result={entities[key]} />
     )
   }
 
   render() {
-    const { searchResults, isFetching } = this.props
+    const { searchResults, isFetching, entities } = this.props
     // @TODO figure out why `searchResults` is undefined when `isFetching` is false
     if (isFetching || _.isUndefined(searchResults)) {
       return <h1>Loading</h1>
     }
     return (
       <List renderItem={this.renderResult}
-            items={searchResults.catalog}
+            keys={searchResults.catalog}
+            values={entities}
             isFetching={isFetching}
             currentPage={searchResults.page}
             totalPages={searchResults.totalPages} />
@@ -52,9 +53,10 @@ ResultsPage.propTypes = {
 
 function mapStateToProps(state, ownProps) {
   const { query } = ownProps.params
-  const { searchResults } = state;
+  const { searchResults, entities } = state;
 
   return {
+    entities,
     searchResults: searchResults[query.toLowerCase()],
     query,
     isFetching: searchResults.isFetching

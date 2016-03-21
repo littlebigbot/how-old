@@ -23,29 +23,8 @@ export function search(query) {
             query
           },
           query
-          // key: 'searchResults',
-          // schema: Schemas.SEARCH
         }
       })
-    }
-  }
-}
-
-export const LOAD_MORE_SEARCH_REQUEST = 'LOAD_MORE_SEARCH_REQUEST';
-export const LOAD_MORE_SEARCH_SUCCESS = 'LOAD_MORE_SEARCH_SUCCESS';
-export const LOAD_MORE_SEARCH_FAILURE = 'LOAD_MORE_SEARCH_FAILURE';
-
-export function loadMoreSearch(query, page) {
-  return {
-    [CALL_API]: {
-      types: [ LOAD_MORE_SEARCH_REQUEST, LOAD_MORE_SEARCH_SUCCESS, LOAD_MORE_SEARCH_FAILURE ],
-      endpoint: `/search/multi`,
-      data: {
-        query,
-        page
-      },
-      // key: 'searchResults',
-      // schema: Schemas.SEARCH
     }
   }
 }
@@ -54,13 +33,17 @@ export const LOAD_MEDIA_REQUEST = 'LOAD_MEDIA_REQUEST';
 export const LOAD_MEDIA_SUCCESS = 'LOAD_MEDIA_SUCCESS';
 export const LOAD_MEDIA_FAILURE = 'LOAD_MEDIA_FAILURE';
 
-export function loadMedia(mediaType, id) {
-  return {
-    [CALL_API]: {
-      types: [ LOAD_MEDIA_REQUEST, LOAD_MEDIA_SUCCESS, LOAD_MEDIA_FAILURE ],
-      endpoint: `/${mediaType}/${id}`,
-      key: 'media',
-      schema: Schemas.MEDIA
+export function loadMediaIfNeeded(mediaType, id) {
+  return (dispatch, getState) => {
+    const { entities } = getState();
+    if(!_.isObject(entities[id])) {
+      return dispatch({
+        [CALL_API]: {
+          types: [ LOAD_MEDIA_REQUEST, LOAD_MEDIA_SUCCESS, LOAD_MEDIA_FAILURE ],
+          endpoint: `/${mediaType}/${id}`,
+          id
+        }
+      });
     }
   }
 };

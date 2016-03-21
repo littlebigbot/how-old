@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react'
-import { map, isEmpty } from 'lodash';
+import { map, isEmpty, partial } from 'lodash';
 
 export default class List extends Component {
   // renderLoadMore() {
@@ -17,26 +17,29 @@ export default class List extends Component {
   render() {
     console.log(this);
     const {
-      isFetching, items,
-      renderItem, loadingLabel,
+      isFetching,
+      keys,
+      values,
+      renderItem,
+      loadingLabel,
       totalPages,
       currentPage
     } = this.props
 
-    const isListEmpty = isEmpty(items);
+    const isListEmpty = isEmpty(keys);
     const isLastPage = currentPage === totalPages;
 
-    if (isFetching && (items && items.length === 0)) {
+    if (isFetching && (keys && keys.length === 0)) {
       return <h2><i>{loadingLabel}</i></h2>
     }
 
     if (isListEmpty && isLastPage) {
       return <h1><i>Nothing here!</i></h1>
     }
-
+    const renderToValues = partial(renderItem, values);
     return (
       <div>
-        {map(items, renderItem)}
+        {map(keys, renderToValues)}
       </div>
     )
   }
@@ -46,7 +49,8 @@ List.propTypes = {
   loadingLabel: PropTypes.string.isRequired,
   // pageCount: PropTypes.number,
   renderItem: PropTypes.func.isRequired,
-  items: PropTypes.array.isRequired,
+  keys: PropTypes.array.isRequired,
+  values: PropTypes.object.isRequired,
   isFetching: PropTypes.bool.isRequired,
   // onLoadMoreClick: PropTypes.func.isRequired,
 }

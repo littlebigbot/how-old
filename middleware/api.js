@@ -26,21 +26,6 @@ function serialize(obj) {
   }), '&');
 }
 
-// function processSearch(query, results) {
-
-//   // return {
-//   //   [query]: results
-//   // }
-//   return _.map(results, (result) => {
-//     switch(result.mediaType) {
-//       case 'person':
-
-//       case 'tv':
-//       case 'movie':
-//     }
-//   });
-// }
-
 function makeUrl(endpoint) {
   return (endpoint.indexOf(API_ROOT) === -1) ? API_ROOT + endpoint : endpoint;
 }
@@ -48,7 +33,7 @@ function makeUrl(endpoint) {
 // Fetches an API response and normalizes the result JSON according to schema.
 // This makes every API response have the same shape, regardless of how nested it was.
 function callApi(config) {
-  const { endpoint, data, key, schema } = config;
+  const { endpoint, data, key, schema, query } = config;
   const url = makeUrl(endpoint);
 
   return fetch(`${url}?${serialize({...data, api_key: API_KEY})}`)
@@ -60,10 +45,10 @@ function callApi(config) {
       }
 
       const camelizedJson = camelizeKeys(json)
-      console.log(camelizedJson);
-      if(schema) {
-        return normalize(camelizedJson, schema);
-      }
+      // console.log(mapResultsToDetails(camelizedJson.results));
+      // if(schema) {
+      //   return normalize(camelizedJson, schema);
+      // }
       return camelizedJson;
       // console.log(camelizedJson)
       // return {
@@ -101,7 +86,7 @@ export default store => next => action => {
   }
 
   let { endpoint } = callAPI
-  const { key, types, query } = callAPI
+  const { key, types, query, id } = callAPI
 
   if (typeof endpoint === 'function') {
     endpoint = endpoint(store.getState())
@@ -134,7 +119,8 @@ export default store => next => action => {
     response => next(actionWith({
       response,
       type: successType,
-      query
+      query,
+      id
     })),
     error => next(actionWith({
       type: failureType,
