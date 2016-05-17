@@ -22,7 +22,9 @@ export function search(query) {
           data: {
             query
           },
-          query
+          extraParams: {
+            query
+          }
         }
       })
     }
@@ -36,33 +38,56 @@ export const LOAD_MEDIA_FAILURE = 'LOAD_MEDIA_FAILURE';
 export function loadMediaIfNeeded(mediaType, id) {
   return (dispatch, getState) => {
     const { entities } = getState();
-    if(!_.isObject(entities[id])) {
+    const media = entities[id];
+    if(!_.isObject(media) || !media.fullData) {
       return dispatch({
         [CALL_API]: {
           types: [ LOAD_MEDIA_REQUEST, LOAD_MEDIA_SUCCESS, LOAD_MEDIA_FAILURE ],
           endpoint: `/${mediaType}/${id}`,
-          id
+          extraParams: {
+            id,
+            mediaType
+          }
         }
       });
     }
   }
 };
 
-// export const LOAD_EXTRA_INFO_REQUEST = 'LOAD_EXTRA_INFO_REQUEST';
-// export const LOAD_EXTRA_INFO_SUCCESS = 'LOAD_EXTRA_INFO_SUCCESS';
-// export const LOAD_EXTRA_INFO_FAILURE = 'LOAD_EXTRA_INFO_FAILURE';
+export const GET_CREDITS_REQUEST = 'GET_CREDITS_REQUEST';
+export const GET_CREDITS_SUCCESS = 'GET_CREDITS_SUCCESS';
+export const GET_CREDITS_FAILURE = 'GET_CREDITS_FAILURE';
 
-// export function loadMedia(mediaType, id) {
-//   return {
-//     [CALL_API]: {
-//       types: [ LOAD_EXTRA_INFO_REQUEST, LOAD_EXTRA_INFO_SUCCESS, LOAD_EXTRA_INFO_FAILURE ],
-//       endpoint: `/${mediaType}/${id}`,
-//       key: 'searchResults'
-//     }
-//   }
-// };
+export function getCredits(mediaType, id) {
+  return (dispatch, getState) => {
+    const { entities } = getState();
+    const media = entities[id];
+    console.log(media)
+    if(_.isEmpty(media.credits)) {
+      return dispatch({
+        [CALL_API]: {
+          types: [ GET_CREDITS_REQUEST, GET_CREDITS_SUCCESS, GET_CREDITS_FAILURE ],
+          endpoint: mediaType === 'person' ? `/${mediaType}/${id}/combined_credits` : `/${mediaType}/${id}/credits`,
+          extraParams: {
+            id
+          }
+        }
+      });
+    }
+  }
+}
 
-export const RESET_ERROR_MESSAGE = 'RESET_ERROR_MESSAGE'
+export function getFullCredits(creditId) {
+  return {
+    types: [ GET_FULL_CREDITS_REQUEST, GET_FULL_CREDITS_SUCCESS, GET_FULL_CREDITS_FAILURE ],
+    extraParams: {
+      creditId
+    }
+  }
+}
+
+
+export const RESET_ERROR_MESSAGE = 'RESET_ERROR_MESSAGE';
 
 // Resets the currently visible error message.
 export function resetErrorMessage() {

@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-import { loadMediaIfNeeded } from '../actions'
+import { loadMediaIfNeeded, getCredits, getFullCredits } from '../actions'
 import _ from 'lodash';
 
 class MediaPage extends Component {
@@ -10,8 +10,12 @@ class MediaPage extends Component {
   }
 
   componentWillMount() {
-    const {mediaType, id, loadMediaIfNeeded} = this.props;
-    loadMediaIfNeeded(mediaType, id);
+    const {mediaType, id, loadMediaIfNeeded, getCredits, getFullCredits} = this.props;
+    loadMediaIfNeeded(mediaType, id)
+    getCredits(mediaType, id).then(() => {
+      const media = this.props.entities[id];
+      _.each(media.cast, getFullCredits);
+    })
   }
 
   // componentWillReceiveProps(nextProps) {
@@ -24,7 +28,11 @@ class MediaPage extends Component {
 
     return (
       <div>
-        {media.title}
+        {media.name}
+
+        <div>
+          {media.firstAirDate || '???'} - {media.lastAirDate || '???'}
+        </div>
       </div>
     )
   }
@@ -33,6 +41,12 @@ class MediaPage extends Component {
     return (
       <div>
         {media.title}
+        <ul>
+          {_.isObject(media.credits) && _.map(media.credits.cast, (c) => <li>{c.name} - {c.character}</li>)}
+        </ul>
+        <ul>
+          {_.isObject(media.credits) && _.map(media.credits.crew, (c) => <li>{c.name} - {c.job}</li>)}
+        </ul>
       </div>
     )
   }
@@ -81,5 +95,7 @@ function mapStateToProps(state, ownProps) {
 }
 
 export default connect(mapStateToProps, {
-  loadMediaIfNeeded
+  loadMediaIfNeeded,
+  getCredits,
+  getFullCredits
 })(MediaPage)

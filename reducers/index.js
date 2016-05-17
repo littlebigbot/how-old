@@ -4,39 +4,6 @@ import paginate from './paginate';
 import { routerReducer as routing } from 'react-router-redux';
 import { combineReducers } from 'redux';
 
-// Updates an entity cache in response to any action with response.entities.
-// function entities(
-//   state = {
-//     searchResults: {isFetching: false},
-//     media: {isFetching: false}
-//   },
-//   action
-// ) {
-//   if (action.response && action.response.entities) {
-
-//     return {
-//       ...state,
-//       [action.key]: {
-//         ...action.response.entities,
-//         isFetching: action.isFetching
-//       }
-//     };
-
-//   }
-
-//   if(action.key) {
-//     return {
-//       ...state,
-//       [action.key]: {
-//         ...state[action.key],
-//         isFetching: action.isFetching
-//       }
-//     }
-//   }
-
-//   return state
-// }
-
 function entities(state = {}, action) {
   switch(action.type) {
     case ActionTypes.SEARCH_SUCCESS:
@@ -52,24 +19,51 @@ function entities(state = {}, action) {
     case ActionTypes.LOAD_MEDIA_REQUEST:
       return {
         ...state,
-        [action.id]: {
-          ...state[action.id],
+        [action.extraParams.id]: {
+          ...state[action.extraParams.id],
           isFetching: true
         }
       }
     case ActionTypes.LOAD_MEDIA_SUCCESS:
+      console.log(action)
       return {
         ...state,
-        [action.id]: {
+        [action.extraParams.id]: {
+          ...state[action.extraParams.id],
           ...action.response,
-          isFetching: false
+          mediaType: action.extraParams.mediaType,
+          isFetching: false,
+          fullData: true
         }
       }
     case ActionTypes.LOAD_MEDIA_REQUEST:
       return {
         ...state,
-        [action.id]: {
-          ...state[action.id],
+        [action.extraParams.id]: {
+          ...state[action.extraParams.id],
+          isFetching: false
+        }
+      }
+    case ActionTypes.GET_CREDITS_SUCCESS:
+      return {
+        ...state,
+        [action.extraParams.id]: {
+          ...state[action.extraParams.id],
+          isFetching: false,
+          credits: {
+            cast: action.response.cast,
+            crew: action.response.crew
+          }
+        }
+      }
+    case ActionTypes.GET_FULL_CREDITS_SUCCESS:
+      return  {
+        ...state,
+        [action.extraParams.creditId]: {
+          ...state[action.extraParams.creditId],
+          ...action.response,
+          fullData: true,
+          mediaType: 'person',
           isFetching: false
         }
       }
@@ -78,30 +72,8 @@ function entities(state = {}, action) {
   }
 }
 
-function media(state = {isFetching: false}, action) {
-  return {
-    ...state
-  }
-  return state;
-}
-
 function searchResults(state = {isFetching: false}, action) {
   switch(action.type) {
-    // case ActionTypes.LOAD_DETAIL_SUCCESS:
-    //   return {
-    //     ...state,
-    //     [data.id]: {
-    //       ...state[data.id],
-    //       ...action.response.entities,
-    //       isFetching: false
-    //     }
-    //   };
-    // case ActionTypes.LOAD_MORE_SEARCH_SUCCESS:
-    //   return {
-    //     ...state,
-    //     results: { ...state.results, ...action.response.entities },
-    //     isFetching: false
-    //   };
     case ActionTypes.SEARCH_REQUEST:
       return {
         ...state,
@@ -110,8 +82,8 @@ function searchResults(state = {isFetching: false}, action) {
     case ActionTypes.SEARCH_SUCCESS:
       return {
         ...state,
-        [action.query.toLowerCase()]: {
-          catalog: map(data, result => result.id),
+        [action.extraParams.query.toLowerCase()]: {
+          catalog: map(action.response.results, result => result.id),
           page: action.response.page,
           totalResults: action.response.totalResults,
         },
@@ -126,22 +98,6 @@ function searchResults(state = {isFetching: false}, action) {
 
   return state;
 }
-
-// If we normalize, we need to save the metadata.
-// function meta(state = {searchResults: {}}, action) {
-//   if(action.response && action.response.result) {
-//     const key = keys(action.response.entities)[0];
-//     return {
-//       ...state,
-//       [key]: {
-//         ...action.response.result
-//       }
-//     }
-//     // return/ ret;
-//   }
-
-//   return state;
-// }
 
 // Updates error message to notify about the failed fetches.
 function errorMessage(state = null, action) {
